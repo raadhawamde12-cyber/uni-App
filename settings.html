@@ -1,29 +1,297 @@
-const CACHE_NAME = "student-app-v2";
-const ASSETS = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#3bab4f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>الإعدادات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#3bab4f;
+    --green-dark:#2e853e;
+    --bg:#f2f3f5;
+    --card:#ffffff;
+    --text-dark:#202428;
+    --text-gray:#8b9097;
+    --shadow:0 8px 20px rgba(20,40,30,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Tajawal','Segoe UI',sans-serif;
+    background:var(--bg);
+    display:flex;
+    justify-content:center;
+  }
+  .page{
+    width:100%;
+    max-width:440px;
+    min-height:100vh;
+    position:relative;
+    padding:14px 0 96px;
+  }
 
-self.addEventListener("install", (event) => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
-});
+  /* ---------- Top bar ---------- */
+  .topbar{padding:6px 16px 16px;}
+  .topbar-title{font-size:18px;font-weight:800;color:var(--text-dark);text-align:right;}
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
-});
+  /* ---------- Profile card ---------- */
+  .profile-card{
+    margin:0 16px;
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:18px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .profile-avatar{
+    width:64px;height:64px;border-radius:50%;
+    object-fit:cover;flex-shrink:0;
+    border:2px solid var(--bg);
+    box-shadow:0 0 0 1px #e3e5e8;
+  }
+  .profile-info{text-align:right;}
+  .profile-name{font-weight:700;font-size:15px;color:var(--text-dark);line-height:1.4;}
+  .profile-id{font-size:13px;color:var(--text-gray);margin-top:4px;}
 
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request))
-  );
-});
+  /* ---------- Settings list ---------- */
+  .settings-list{
+    margin:16px 16px 0;
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:14px;
+    padding:16px 18px;
+    border-bottom:1px solid #f0f1f3;
+    cursor:pointer;
+  }
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row.lang-row{justify-content:space-between;}
+  .row-group{display:flex;align-items:center;gap:14px;}
+  .row-label{font-size:14.5px;font-weight:500;color:var(--text-dark);}
+  .row-icon{
+    width:38px;height:38px;border-radius:12px;
+    border:1.5px solid #e3e5e8;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-dark);
+    flex-shrink:0;
+  }
+  .row-chevron{color:var(--text-gray);display:flex;align-items:center;}
+
+  .settings-row.logout-row{margin-top:6px;}
+  .logout-label{color:#e54848;font-size:14.5px;font-weight:600;}
+
+  /* ---------- Lightbox ---------- */
+  .lightbox{
+    position:fixed;inset:0;
+    background:#000;
+    display:none;
+    align-items:center;justify-content:center;
+    z-index:50;
+  }
+  .lightbox.show{display:flex;}
+  .lightbox img{
+    width:100%;height:100%;
+    object-fit:contain;
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    margin:0 auto;
+    width:100%;max-width:440px;
+    background:var(--card);
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-end;
+    padding:10px 0 10px;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -6px 18px rgba(0,0,0,0.06);
+  }
+  .nav-item{
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:11px;color:var(--text-gray);
+    background:none;border:none;font-family:inherit;
+    cursor:pointer;
+  }
+  .nav-icon{
+    width:40px;height:40px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-gray);
+  }
+  .nav-item.active{color:var(--green);font-weight:700;}
+  .nav-item.active .nav-icon{
+    background:var(--green);color:#fff;
+    margin-top:-22px;
+    box-shadow:0 6px 14px rgba(59,171,79,0.35);
+  }
+
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="topbar">
+    <div class="topbar-title">الإعدادات</div>
+  </div>
+
+  <!-- Profile -->
+  <div class="profile-card">
+    <img src="me.jpeg" alt="الصورة الشخصية" class="profile-avatar">
+    <div class="profile-info">
+      <div class="profile-name">عبدالرحمن عماد عبدالرحمن الحليمي</div>
+      <div class="profile-id">202321960</div>
+    </div>
+  </div>
+
+  <!-- Settings list -->
+  <div class="settings-list">
+    <div class="settings-row">
+      <div class="row-group">
+        <span class="row-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+            <circle cx="12" cy="8" r="0.9" fill="currentColor"/>
+            <path d="M12 11v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="row-label">نبذة عنا</span>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="row-group">
+        <span class="row-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="8.5" cy="10.5" r="1.8" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M6 16c.5-1.8 1.8-2.6 2.5-2.6s2 .8 2.5 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M13.5 9.5h4M13.5 12h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="row-label">هوية الطالب</span>
+      </div>
+    </div>
+
+    <div class="settings-row" onclick="openPass(event)">
+      <div class="row-group">
+        <span class="row-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="4" y="3" width="16" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="12" cy="9.5" r="2.6" fill="currentColor"/>
+            <path d="M7 17c.8-2.6 2.7-3.6 5-3.6s4.2 1 5 3.6" fill="currentColor"/>
+          </svg>
+        </span>
+        <span class="row-label">بطاقة دخول الإمتحان</span>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="row-group">
+        <span class="row-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="8" cy="10" r="1.6" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M4 16l4.5-4 3 2.6L16 10l4 5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="row-label">معرض الصور</span>
+      </div>
+    </div>
+
+    <div class="settings-row lang-row">
+      <div class="row-group">
+        <span class="row-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3 12h18M12 3c2.5 2.5 3.8 6 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-6-3.8-9s1.3-6.5 3.8-9Z" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+        </span>
+        <span class="row-label">اللغة</span>
+      </div>
+      <span class="row-chevron">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <div class="settings-list logout-row">
+    <div class="settings-row">
+      <span class="logout-label">خروج</span>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="location.href='index.html'">
+      <span class="nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 11.5 12 4l8 7.5"/>
+          <path d="M6 10v9a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-9"/>
+        </svg>
+      </span>
+      <span>الرئيسية</span>
+    </button>
+    <button class="nav-item">
+      <span class="nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 16v-5a6 6 0 1 0-12 0v5l-1.5 2h15L18 16Z"/>
+          <path d="M10 20a2 2 0 0 0 4 0"/>
+        </svg>
+      </span>
+      <span>التنبيهات</span>
+    </button>
+    <button class="nav-item active" onclick="setActive(this)">
+      <span class="nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.2-2-3.4-2.3.9a8 8 0 0 0-1.7-1l-.3-2.3h-4l-.3 2.3a8 8 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.2a8 8 0 0 0 0 2l-2 1.2 2 3.4 2.3-.9a8 8 0 0 0 1.7 1l.3 2.3h4l.3-2.3a8 8 0 0 0 1.7-1l2.3.9 2-3.4-2-1.2Z"/>
+        </svg>
+      </span>
+      <span>الإعدادات</span>
+    </button>
+  </div>
+
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img src="pass.jpeg" alt="بطاقة دخول الإمتحان">
+  </div>
+
+</div>
+
+<script>
+  function setActive(el){
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  function openPass(e){
+    e.stopPropagation();
+    document.getElementById('lightbox').classList.add('show');
+  }
+  function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('show');
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+
+</body>
+</html>
