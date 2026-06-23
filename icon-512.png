@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#3bab4f" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>الرئيسية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#3bab4f;
+    --green-dark:#2e853e;
+    --bg:#f2f3f5;
+    --card:#ffffff;
+    --text-dark:#202428;
+    --text-gray:#8b9097;
+    --shadow:0 8px 20px rgba(20,40,30,0.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Tajawal','Segoe UI',sans-serif;
+    background:var(--bg);
+    display:flex;
+    justify-content:center;
+  }
+  .app{
+    width:100%;
+    max-width:440px;
+    min-height:100vh;
+    position:relative;
+    padding:0 0 96px;
+  }
+  .home-shot{width:100%;display:block;}
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    margin:0 auto;
+    width:100%;max-width:440px;
+    background:var(--card);
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-end;
+    padding:10px 0 10px;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -6px 18px rgba(0,0,0,0.06);
+  }
+  .nav-item{
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:11px;color:var(--text-gray);
+    background:none;border:none;font-family:inherit;
+    cursor:pointer;
+  }
+  .nav-icon{
+    width:40px;height:40px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-gray);
+  }
+  .nav-item.active{color:var(--green);font-weight:700;}
+  .nav-icon img{width:26px;height:26px;object-fit:contain;}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <img src="home-content.jpeg" alt="الرئيسية" class="home-shot">
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="setActive(this)">
+      <span class="nav-icon">
+        <img src="home-icon.png" alt="الرئيسية">
+      </span>
+      <span>الرئيسية</span>
+    </button>
+    <button class="nav-item" onclick="setActive(this)">
+      <span class="nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 16v-5a6 6 0 1 0-12 0v5l-1.5 2h15L18 16Z"/>
+          <path d="M10 20a2 2 0 0 0 4 0"/>
+        </svg>
+      </span>
+      <span>التنبيهات</span>
+    </button>
+    <button class="nav-item" onclick="location.href='settings.html'">
+      <span class="nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 13a7.97 7.97 0 0 0 0-2l2-1.2-2-3.4-2.3.9a8 8 0 0 0-1.7-1l-.3-2.3h-4l-.3 2.3a8 8 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.2a8 8 0 0 0 0 2l-2 1.2 2 3.4 2.3-.9a8 8 0 0 0 1.7 1l.3 2.3h4l.3-2.3a8 8 0 0 0 1.7-1l2.3.9 2-3.4-2-1.2Z"/>
+        </svg>
+      </span>
+      <span>الإعدادات</span>
+    </button>
+  </div>
+
+
+</div>
+
+<script>
+  function setActive(el){
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+
+</body>
+</html>
